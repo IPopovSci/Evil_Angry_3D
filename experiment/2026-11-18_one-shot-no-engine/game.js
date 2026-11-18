@@ -6479,6 +6479,7 @@ const SKIN_TONES = [[.8, .6, .45], [.65, .45, .3], [.45, .3, .2], [.9, .75, .62]
    ============================================================ */
 function enterTown(from, pos) {
   G.mode = 'town';
+  el('menuRoot').classList.add('hidden');
   G.floor = buildTown(G.campaign);
   if (R) buildStaticMesh(R, G.floor);
   P.pos = pos ? [pos[0], 0, pos[1]] : [G.floor.spawn[0], 0, G.floor.spawn[2]];
@@ -6499,6 +6500,7 @@ function enterTown(from, pos) {
 }
 function enterFloor(idx, from, pos) {
   if (idx > 16) idx = 16;
+  el('menuRoot').classList.add('hidden');
   const fs = G.campaign.floors[idx] || (G.campaign.floors[idx] = {});
   let F;
   try { F = generateFloor(G.campaign, idx); }
@@ -6629,7 +6631,7 @@ function boot() {
     INPUT = makeInput();
     buildHotbarDom();
     el('hud').style.fontSize = (G.settings.uiScale * 100) + '%';
-    el('version').textContent = 'Hollowmere build 1.0.1 · spec v1.1';
+    el('version').textContent = 'Hollowmere build 1.0.2 · spec v1.1';
     document.body.addEventListener('mousedown', () => { SND.init(); SND.resume(); }, { once: true });
     showMainMenu();
     requestAnimationFrame(gameLoop);
