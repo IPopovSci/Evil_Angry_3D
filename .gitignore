@@ -1,0 +1,20 @@
+# OS / editor
+Thumbs.db
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# Logs & temp
+*.log
+*.tmp
+tmp/
+
+# Common build artifacts
+node_modules/
+dist/
+build/
+__pycache__/
+.venv/
+venv/
+*.pyc
