@@ -6,7 +6,7 @@ that approaches can be compared fairly.
 
 | Folder | Approach | Prompt mode | Status |
 |---|---|---|---|
-| `2026-11-18_one-shot-no-engine/` | No engine: raw WebGL2 + DOM UI + WebAudio, single continuous generation, agent self-tested via `node game.js` | "No engine, one shot, take design document, make a game" | Delivered · self-tests 27/27 |
+| `2026-11-18_one-shot-no-engine/` | No engine: raw WebGL2 + DOM UI + WebAudio, single continuous generation, agent self-tested via `node game.js` | "No engine, one shot, take design document, make a game" | **Done.** Delivered + 2 human-test fix rounds (build 1.0.2); playable menu→creation→town/movement confirmed; full results & defect log in its `EXPERIMENT.md` |
 
 Each folder contains an `EXPERIMENT.md` that pins the date, specification
 version, model, branch, the verbatim prompt, the constraints, the feature

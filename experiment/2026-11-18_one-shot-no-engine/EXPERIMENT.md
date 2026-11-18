@@ -72,3 +72,35 @@ Notable checks: 320 seeded floor generations × 16 floor indices all solvable
 paired with keys obtainable before them); 800 loot rolls structurally valid;
 grid placement/rotation/swap invariants; armor/resistance formula bounds;
 price/identify/repair formulas; save item round-trip.
+
+## Result record (final)
+
+**Status: DELIVERED (patched). Playable — main menu, character creation, town entry, movement and UI confirmed working by human browser testing (Firefox + Opera); deeper dungeon run not fully play-tested before this experiment was closed.**
+
+### Commit trail
+
+| Commit | Stage |
+|---|---|
+| `2483eb5` | (pre-existing) initial design doc v1.0 |
+| `4d55d58` | design doc v1.1 change committed separately (user's own edit, done before the run) |
+| `e2dfada` | one-shot implementation delivered under `experiment/2026-11-18_one-shot-no-engine/` |
+| `ee3f7af` | experiment record pins the implementation hash |
+| `57133eb` | patch 1 — boot crash + input (build 1.0.1) |
+| `81f1896` | patch 2 — UI stacking (build 1.0.2) |
+
+### Human play-test log (2 rounds)
+
+| # | User report | Root cause | Class of defect | Fix |
+|---|---|---|---|---|
+| 1 | "opens up to dark/black screen" (Firefox & Opera) | Fragment shader called `dist()` — not a GLSL builtin (`distance`). Shader compile failed → renderer constructor threw → `boot()` crashed before the menu rendered, leaving only the empty dark menu backdrop | GLSL compile error — **invisible to headless self-tests** (no GPU in node) | `dist` → `distance` (`57133eb`); boot now catches and displays startup errors on screen |
+| 2 | (found by agent audit, same round) | `DEFAULT_BINDS` had no `forward/back/left/right` — WASD movement could never register | Input config omission | Registered KeyW/S/A/D (`57133eb`) |
+| 3 | (found by agent audit, same round) | Starting potions were belt-bound but never added to the backpack; belt resolves stacks from the bag → potions unusable | Inventory startup wiring | Add starting stacks to bag (`57133eb`) |
+| 4 | "buttons don't do anything, only make sound" | `#screens` (z-index 20) rendered **underneath** the opaque full-screen menu overlay `#menuRoot` (z-index 50) — all menu panels opened behind the menu; also `#menuRoot` was never hidden when a game started (would have covered the town too) | CSS stacking — **invisible to headless self-tests** | screens z60 / tooltip z70 / dialog z55; hide menu on game entry (`81f1896`) |
+
+### Data points for cross-experiment comparison
+
+- Code size at delivery: `game.js` ≈ 6,700 lines + `index.html` (~250 lines). Final state after patches: ~6,720 lines.
+- Self-tests at delivery and after every patch: **27/27 passing** (incl. 320 seeded floors × 16 indices reachability, 800 loot rolls, grid/damage/economy invariants).
+- Post-delivery human-test iterations needed: **2** (both triggered by defect classes the headless harness cannot execute: GLSL compilation and CSS stacking/layout).
+- Defect yield: 3 defects caught by self-tests before delivery (seeded-generation connectivity, spawn NaN, affix typing — fixed during development); 4 defects reachable only in a real browser (1 fatal shader compile, 1 input config, 1 inventory wiring, 1 CSS stacking).
+- Lesson recorded for future experiments against this spec: any headless verification regime should add (a) an actual shader-compile step and (b) a minimal DOM smoke test (panel opens above whatever overlay spawned it, buttons focusable) before human hand-off; both defects here were trivially mechanical but blocked 100% of gameplay.
