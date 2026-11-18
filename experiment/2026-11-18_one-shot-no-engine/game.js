@@ -988,7 +988,7 @@ void main(){
     lit += uLightCol[i].rgb * uLightCol[i].a * att * nl;
   }
   vec3 c = albedo * lit + albedo * max(em, uEmFull) * 1.4;
-  float fog = 1.0 - exp(-dist(vWorld,uCamPos)*uFogDen);
+  float fog = 1.0 - exp(-distance(vWorld,uCamPos)*uFogDen);
   c = mix(c, uFogCol, clamp(fog,0.0,1.0));
   c = pow(clamp(c,0.0,1.0), vec3(1.0/1.7));
   frag = vec4(c,1.0);
@@ -1954,7 +1954,7 @@ function makePlayer(opts) {
     if (it.cat === 'potion' || it.cat === 'scroll') {
       let placed = false;
       for (let i = 0; i < 6; i++) if (!p.belt[i]) { p.belt[i] = id; placed = true; break; }
-      if (placed && it.cat === 'potion') continue;
+      if (placed) void placed; // belt binds by base id; the stack itself lives in the bag below
     }
     addToBag(p, it);
   }
@@ -4125,8 +4125,9 @@ function updateHUD() {
     const cd = s.querySelector('.cd');
     let key = null, max = 0;
     if (sk) {
-      key = (sk.kind === 'talent' ? 't_' : 's_') + sk.id;
       const t = sk.kind === 'talent' ? TALENT_BY_ID[sk.id] : SPELLS[sk.id];
+      if (!t) { s.classList.add('empty'); continue; }
+      key = (sk.kind === 'talent' ? 't_' : 's_') + sk.id;
       max = t.cd || 1;
       const rem = cdRemaining(key);
       if (rem > 0) { cd.classList.remove('hidden'); cd.style.transform = 'scaleY(' + clamp(rem / (max / (1 + P.stats.haste / 100)), 0, 1) + ')'; }
@@ -5635,7 +5636,7 @@ void quiet2;
 /* ============================================================
    17. INPUT, CAMERA, PLAYER UPDATE
    ============================================================ */
-const DEFAULT_BINDS = { attack: 'Mouse0', block: 'Mouse2', kick: 'KeyF', interact: 'KeyE', skillQ: 'KeyQ', skillR: 'KeyR', dodge: 'AltLeft', jump: 'Space', sprint: 'ShiftLeft', crouch: 'KeyC', sheathe: 'KeyH', portal: 'KeyT', inv: 'Tab', map: 'KeyM', journal: 'KeyJ', drop: 'KeyG', pause: 'Escape', belt1: 'Digit1', belt2: 'Digit2', belt3: 'Digit3', belt4: 'Digit4', belt5: 'Digit5', belt6: 'Digit6' };
+const DEFAULT_BINDS = { forward: 'KeyW', back: 'KeyS', left: 'KeyA', right: 'KeyD', attack: 'Mouse0', block: 'Mouse2', kick: 'KeyF', interact: 'KeyE', skillQ: 'KeyQ', skillR: 'KeyR', dodge: 'AltLeft', jump: 'Space', sprint: 'ShiftLeft', crouch: 'KeyC', sheathe: 'KeyH', portal: 'KeyT', inv: 'Tab', map: 'KeyM', journal: 'KeyJ', drop: 'KeyG', pause: 'Escape', belt1: 'Digit1', belt2: 'Digit2', belt3: 'Digit3', belt4: 'Digit4', belt5: 'Digit5', belt6: 'Digit6' };
 const DEFAULT_SETTINGS = { sens: 1.0, fov: 85, invertY: false, volMaster: .8, volMusic: .5, volSfx: .9, volAmb: .7, uiScale: 1, dmgNumbers: true, enemyBars: true, gore: true, bob: true, autoGold: true, binds: {} };
 function loadSettings() {
   try { G.settings = Object.assign({}, DEFAULT_SETTINGS, JSON.parse(localStorage.getItem(LS_KEY + 'settings') || '{}')); }
@@ -6490,6 +6491,7 @@ function enterTown(from, pos) {
   // gold caches appear in their floors, not town
   SND.ambient('town');
   showFloorTitle('Hollowmere', 'The last lit place');
+  if (INPUT && !INPUT.locked) toast('Click the view to capture the mouse — WASD to move, E to talk', '');
   el('hud').classList.remove('hidden');
   closeAllScreens();
   G.state = 'play';
@@ -6545,6 +6547,7 @@ function enterFloor(idx, from, pos) {
   SND.ambient([4, 8, 12, 16].includes(idx) && !F.bossDefeated ? 'boss' : ['stone', 'crypt', 'cistern', 'rift'][regionOf(idx).id]);
   const reg = regionOf(idx);
   showFloorTitle('Floor ' + idx, reg.name + ' — ' + reg.desc);
+  if (INPUT && !INPUT.locked) toast('Click the view to capture the mouse', '');
   el('hud').classList.remove('hidden');
   G.state = 'play';
   G.campaign.maxFloor = Math.max(G.campaign.maxFloor, idx);
@@ -6595,27 +6598,51 @@ function buildHotbarDom() {
 }
 
 /* ---------------- boot ---------------- */
+function fatalBoot(e) {
+  const n = el('nogl');
+  n.classList.remove('hidden');
+  n.style.zIndex = '100';
+  n.style.background = 'rgba(10,8,6,.95)';
+  n.style.display = 'flex';
+  n.style.flexDirection = 'column';
+  n.style.padding = '30px';
+  n.style.textAlign = 'left';
+  n.innerHTML = '<div style="color:#e08080;font-size:20px;margin-bottom:10px">Startup error</div>' +
+    '<div style="color:#d8cdb4;max-width:820px;white-space:pre-wrap">' + esc(String(e && e.message || e)) + '</div>' +
+    '<div style="color:#8a7f68;font-size:12px;max-width:820px;white-space:pre-wrap;margin-top:10px">' + esc(String(e && e.stack || '').split('\n').slice(0, 6).join('\n')) + '</div>' +
+    '<div style="color:#8a7f68;font-size:12px;margin-top:14px">(click to dismiss)</div>';
+  n.onclick = () => n.classList.add('hidden');
+}
 function boot() {
-  G = {
-    state: 'menu', mode: 'town', campaign: null, floor: null, time: 0,
-    uiOpen: null, settings: null,
-  };
-  loadSettings();
-  SND = makeSND();
-  const canvas = el('cv');
-  R = makeRenderer(canvas);
-  if (!R) { el('nogl').classList.remove('hidden'); return; }
-  window.addEventListener('resize', () => R.resize());
-  R.resize();
-  INPUT = makeInput();
-  buildHotbarDom();
-  el('hud').style.fontSize = (G.settings.uiScale * 100) + '%';
-  el('version').textContent = 'Hollowmere build 1.0 · spec v1.1';
-  document.body.addEventListener('mousedown', () => { SND.init(); SND.resume(); }, { once: true });
-  showMainMenu();
-  requestAnimationFrame(gameLoop);
+  try {
+    G = {
+      state: 'menu', mode: 'town', campaign: null, floor: null, time: 0,
+      uiOpen: null, settings: null,
+    };
+    loadSettings();
+    SND = makeSND();
+    const canvas = el('cv');
+    R = makeRenderer(canvas);
+    if (!R) { fatalBoot(new Error('WebGL2 is not available in this browser.')); return; }
+    window.addEventListener('resize', () => R.resize());
+    R.resize();
+    INPUT = makeInput();
+    buildHotbarDom();
+    el('hud').style.fontSize = (G.settings.uiScale * 100) + '%';
+    el('version').textContent = 'Hollowmere build 1.0.1 · spec v1.1';
+    document.body.addEventListener('mousedown', () => { SND.init(); SND.resume(); }, { once: true });
+    showMainMenu();
+    requestAnimationFrame(gameLoop);
+  } catch (e) {
+    try { console.error(e); } catch (e2) {}
+    fatalBoot(e);
+  }
 }
 if (!NODE) {
+  window.addEventListener('error', ev => {
+    const msg = ev && (ev.error || ev.message);
+    if (msg) { try { console.error(msg); } catch (e2) {} fatalBoot(msg); }
+  });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
 }
