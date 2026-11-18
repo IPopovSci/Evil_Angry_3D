@@ -10,7 +10,7 @@ other approaches executed against the same specification.
 | Date | 2026-11-18 |
 | Specification | [`first_person_dungeon_arpg_design.md`](../../first_person_dungeon_arpg_design.md) v1.1 (normative, single-player) — treated as unchanged input for this run |
 | Agent / model | GLM-5.3-Flash (`opencode-go`), running in OpenCode |
-| Branch | `master` (this file is added by the same commit that carries the implementation; see `git log --follow -- experiment/2026-11-18_one-shot-no-engine`) |
+| Branch | `master` · implementation commit **`e2dfada`** ("Experiment 2026-11-18: one-shot no-engine implementation of the ARPG spec"); spec change committed separately just before it as **`4d55d58`** |
 | Approach | **No game engine.** One hand-written codebase: raw WebGL2 renderer, DOM-based UI, procedural WebAudio synthesis, custom world generation, custom save system |
 | Generation mode | **One shot.** The entire game was produced in a single continuous session without user feedback iterations; the agent self-verified via headless self-tests (`node game.js`) and fixed its own defects before delivery |
 
