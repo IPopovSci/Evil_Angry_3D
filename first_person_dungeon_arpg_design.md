@@ -1,12 +1,12 @@
 # FIRST-PERSON DUNGEON ARPG — GAMEPLAY & TECHNICAL DESIGN SPECIFICATION
 
-**Document version:** 1.0 · **Date:** 2026-11-18 · **Status:** Normative feature specification
+**Document version:** 1.1 · **Date:** 2026-11-18 · **Status:** Normative feature specification (single-player)
 
 > **Interpretation rule:** This document describes the game to build. All systems, content, interactions, persistence rules, and acceptance conditions specified here are requirements. Values labeled *default* are starting balance parameters and must be editable in data, rather than scattered through code. Any unspecified artistic details may be original, but unspecified mechanics must be resolved consistently with the principles and invariants below.
 
 ## 0. Product definition
 
-A real-time **first-person, dark-fantasy action RPG** organized around **one persistent town hub and one multi-floor, procedurally assembled dungeon**. The player chooses a class; explores in real time; fights with directional weapons, bows, magic, blocking, and physical kicks; finds randomized weapons, armor, gold, books, and consumables; levels attributes and class skills; returns to town to identify, repair, sell, and restock; then descends deeper through increasingly dangerous environments, bosses, and story events. Supports single-player and cooperative online play.
+A real-time **first-person, dark-fantasy action RPG** organized around **one persistent town hub and one multi-floor, procedurally assembled dungeon**. The player chooses a class; explores in real time; fights with directional weapons, bows, magic, blocking, and physical kicks; finds randomized weapons, armor, gold, books, and consumables; levels attributes and class skills; returns to town to identify, repair, sell, and restock; then descends deeper through increasingly dangerous environments, bosses, and story events. The game is **single-player only**: no online, LAN, or shared-world multiplayer features are in scope.
 
 **Inspiration boundaries:** Reproduce the *systems and genre feel*, not the characters, places, names, quests, dialogue, monsters, meshes, textures, UI artwork, audio, animations, or source code of any existing game. All named content below is new placeholder fiction that may be replaced with other original content without changing the mechanics.
 
@@ -66,7 +66,7 @@ This is continuous real-time gameplay. Combat, loot, and exploration occur in th
 
 ### 2.1 Character creation
 
-Fields: character name, one of three classes, body/presentation preset, skin/face/hair options, cosmetic colors, voice preset, starting difficulty, character-slot selection. Appearance affects the first-person hands, equipment visuals, character screen, co-op avatars, and reflections when available; it confers no stat benefit. Show class summary, initial attributes, starting weapon/armor/consumables, and unique class abilities before confirmation.
+Fields: character name, one of three classes, body/presentation preset, skin/face/hair options, cosmetic colors, voice preset, starting difficulty, character-slot selection. Appearance affects the first-person hands, equipment visuals, character screen, and reflections when available; it confers no stat benefit. Show class summary, initial attributes, starting weapon/armor/consumables, and unique class abilities before confirmation.
 
 ### 2.2 Primary attributes
 
@@ -217,7 +217,7 @@ Display: name, class, level, experience bar and numeric next threshold, unspent 
 | M | Full map overlay; minimap remains top-left by default |
 | J | Journal / quests / lore / bestiary |
 | T | Town-return spell/portal when unlocked, or scroll when available |
-| Escape | Pause/menu/settings; in multiplayer, menu does not pause world |
+| Escape | Pause/menu/settings; menu pauses the world |
 | G | Drop highlighted inventory item, with confirmation for rare/unique |
 | H | Sheathe/unsheathe main weapon; changes first-person posture, no combat advantage |
 
@@ -236,7 +236,7 @@ Display: name, class, level, experience bar and numeric next threshold, unspent 
 ### 4.3 Equipment in world
 
 - Currently held weapon, shield/off-hand, glowing enchantments and affected hands visible in first-person. Weapon shape and material affect attack animations, hit reach, timing and impact sound.
-- Equipped gear visibly changes a third-person character preview and co-op character body; item cosmetics should map to an asset variant from a common equipment rig or attachment system.
+- Equipped gear visibly changes a third-person character preview; item cosmetics should map to an asset variant from a common equipment rig or attachment system.
 - Dynamic light from torches, glowing weapons, spells and lanterns affects nearby rooms and is meaningful for navigation.
 
 ---
@@ -311,7 +311,7 @@ Enemy attack startup includes silhouette, animation, sound and (where applicable
 Mandatory slots: **head, chest, gloves, boots, primary hand, off-hand, amulet, ring 1, ring 2**. Optional cosmetic back slot has no stat effect unless data says otherwise. One-handed weapons pair with off-hand shield, focus or second one-handed weapon if that build can dual-wield; two-handed weapons occupy both hand slots. Bow occupies both hands; the ammo pool/arrow quiver is represented as ammo inventory rather than a second physical weapon.
 
 - Slot validation checks item category, requirements, class restrictions if any, dual-wield rules, unique-equip flags, and equipment conflicts *before* mutating inventory.
-- Equipping updates all derived stats, visual meshes, attack animations, kick modifiers, passives, inventory footprint and co-op avatar. Equipment changes cannot grant resources above max or drop resources below zero.
+- Equipping updates all derived stats, visual meshes, attack animations, kick modifiers, passives and inventory footprint. Equipment changes cannot grant resources above max or drop resources below zero.
 - **Durability:** gear has `current/max` durability; attacking/receiving strikes erodes gear appropriately. At zero durability, item remains present but provides no stats or valid attack until repaired. Repair UI shows cost and exact before/after values.
 - **Requirements:** STR/DEX/INT/level gates shown with red warnings. Loot may be carried without meeting requirements. Failed equip never consumes or replaces an existing item.
 - Item comparison displays changed damage range, DPS, armor, resistances and notable effects, not merely one aggregate score.
@@ -345,7 +345,7 @@ Mandatory slots: **head, chest, gloves, boots, primary hand, off-hand, amulet, r
 - Default eligible ordinary item rarity distribution: **65% common / 25% enchanted / 9% rare / 1% relic**, adjusted by elite/boss/container source. Bosses always drop one rare-or-better item, plus their quest-locked progression reward where relevant.
 - Affix examples: `+STR/DEX/INT/VIT`, `+flat health/mana/stamina`, `+min/max physical damage`, `+spellpower`, `+attack speed`, `+crit chance`, `+crit damage`, `+armor`, `+one or all resistances`, `+regen`, `+life/mana steal`, `+move speed`, `+ability haste`, `+elemental damage`, `on-hit status`, `kick effect`, `light radius`, `shield stamina cost`, `mana cost reduction`.
 - Affix restrictions: a shield-only modifier cannot appear on a sword; duplicate exclusive prefixes do not stack within one item; no impossible requirement generated beyond attainable level/attribute caps; mutually exclusive effect tags are enforced.
-- Loot-roll random streams are independent from enemy AI/physics random streams. A chest or boss with an already-committed reward cannot be rerolled through save/load or reconnecting.
+- Loot-roll random streams are independent from enemy AI/physics random streams. A chest or boss with an already-committed reward cannot be rerolled through save/load.
 
 ---
 ## 7. Magic, spellbooks, scrolls, charges and shrines
@@ -404,7 +404,7 @@ A walkable village with unique silhouettes and signs for the following interacta
 
 - NPCs have idle schedules/ambient barks, persistent quest dialogue flags, interaction animations, and appropriately labeled menu states. Dialogue never locks mouse/game input after dismissal.
 - Shop windows include categories, buy/sell panels, price, stock, tooltip, gold before/after and disabled-state reasons. Shift-click transfer rules apply. Purchases are transactional: either both gold and item change, or neither.
-- Town **stash** defaults to **12×10 item grid** with **three tabs**, persistent per account/campaign and safe across character changes when sharing is enabled. Prevent simultaneous co-op edits to the same stash cell via authoritative transaction validation.
+- Town **stash** defaults to **12×10 item grid** with **three tabs**, persistent per account/campaign and safe across character changes when sharing is enabled.
 
 ### 8.2 Currency and prices
 
@@ -529,7 +529,7 @@ function GenerateFloor(campaignSeed, floorIndex, contentVersion):
 | Boss | Mandatory Floors 4, 8, 12, 16 |
 | Traps | 2–8 according to biome |
 
-- Floor challenge budget scales as `base_budget(floor) * difficulty_multiplier * party_scaling` with authored encounter caps. Enemy tiers have budget costs (`grunt 1`, `ranged 1.5`, `brute 2.5`, `elite 5`, `boss special`). The same budget may produce varied compositions with restrictions on simultaneous ranged enemies in narrow rooms.
+- Floor challenge budget scales as `base_budget(floor) * difficulty_multiplier` with authored encounter caps. Enemy tiers have budget costs (`grunt 1`, `ranged 1.5`, `brute 2.5`, `elite 5`, `boss special`). The same budget may produce varied compositions with restrictions on simultaneous ranged enemies in narrow rooms.
 - Loot budget is independent of number of monsters killed; hard encounter rooms may receive increased item-roll sources, making optional danger rewarding. Containers and boss drops are committed on initial spawn/opening and cannot be duplicated.
 - Do not spawn monsters within 8 m of a floor entry point, directly on occupied player space, behind a locked gate they cannot reach when their presence is mandatory, or inside inaccessible geometry.
 
@@ -579,7 +579,7 @@ Provide **24 ordinary archetype templates** (six per region) with independent st
 
 ### 10.3 Boss encounters
 
-**Four bosses, each with at least two recognizable phases and unique mechanics.** Boss gates prevent accidental exit during combat but never permanently trap players after victory or death. The boss health bar, phase cues, arena telegraphs, drop, quest flags and shortcuts are data-driven.
+**Four bosses, each with at least two recognizable phases and unique mechanics.** Boss gates prevent accidental exit during combat but never permanently trap the player after victory or death. The boss health bar, phase cues, arena telegraphs, drop, quest flags and shortcuts are data-driven.
 
 | Floor | Boss concept | Required encounter behavior |
 |---|---|---|
@@ -588,7 +588,7 @@ Provide **24 ordinary archetype templates** (six per region) with independent st
 | 12 | **The Drowned Engineer** | Mechanized/powered enemy; activates water/lightning hazards, switches create vulnerability windows, changes arena traversal |
 | 16 | **The Warden Below** | Multi-limbed supernatural adversary; anatomy/phase mechanics, environment transformation, final exposed-core phase |
 
-- Bosses use deterministic phase triggers (HP threshold, elapsed combat event, destroyed weak points); no duplicate phase trigger after reconnect/save. Respawn behavior follows campaign death rules: an undefeated boss can reset when all players leave, but once defeated remains permanently defeated until New Descent.
+- Bosses use deterministic phase triggers (HP threshold, elapsed combat event, destroyed weak points); no duplicate phase trigger after save/reload. Respawn behavior follows campaign death rules: an undefeated boss resets when the player leaves the encounter, but once defeated remains permanently defeated until New Descent.
 - Boss reward: guaranteed rare-or-better item, gold, XP, one authored quest/shortcut unlock, and chance of region relic.
 - Every boss has visible, audible telegraphs, at least one safe response to each major attack, no unavoidable one-hit attack in default mode at an appropriate level, and no invulnerable phase without an interactable resolution.
 
@@ -609,7 +609,7 @@ Rooms declare combat roles (melee pressure, ranged harassment, tank, caster, sup
 
 Mandatory interactable object types: ordinary/locked/secret doors; door levers; keys; chests of several rarities; destructible crates/barrels; weapon racks; armor stands; bookshelf/lecterns; corpse containers; shrines; fountains; traps; pressure plates; floor switches; chains/pulleys; elevators and stairways; breakable walls; campfires/torches; lore documents; teleport anchors; merchant counters; quest objects and boss entrance triggers.
 
-Each object has: stable ID, interact type, interaction radius, prompt, required condition/item, state, feedback assets, loot or event payload, persistence policy, collision/navigation effect, and multiplayer authority behavior.
+Each object has: stable ID, interact type, interaction radius, prompt, required condition/item, state, feedback assets, loot or event payload, persistence policy, and collision/navigation effect.
 
 ### 11.2 Environmental damage
 
@@ -697,12 +697,12 @@ HUD layout must accommodate 16:9 and ultrawide displays without covering essenti
 
 ### 13.3 Menus and screens
 
-- Main menu: Continue, New Character, Load Character, Multiplayer, Options, Credits, Exit.
-- In-game menu: Resume, Save & Exit, Options, Help/Controls, Return to Main Menu. In solo mode ESC pauses sim time; in co-op the player is still vulnerable while menu open.
+- Main menu: Continue, New Character, Load Character, Options, Credits, Exit.
+- In-game menu: Resume, Save & Exit, Options, Help/Controls, Return to Main Menu. ESC pauses simulation time while the menu is open.
 - Skills panel: class tree, prerequisites, rank, next-rank change, total points, assign ability slot, spellbook learned spells and ranks.
 - Journal panel: active/completed quests, lore notes, discovered bestiary entries, optional objective tracking.
 - World map: town and current dungeon floor; floor history/accessibility list; explored fog, waypoints and legend.
-- Death screen, victory/end sequence, new descent confirmation, respec transaction, vendor/shop, crafting/repair/identification service, multiplayer lobby and connection error state.
+- Death screen, victory/end sequence, new descent confirmation, respec transaction, vendor/shop, crafting/repair/identification service.
 
 ### 13.4 Feedback and legibility
 
@@ -713,83 +713,45 @@ HUD layout must accommodate 16:9 and ultrawide displays without covering essenti
 
 ---
 
-## 14. Cooperative multiplayer
+## 14. Death, difficulty, saving and continuation
 
-### 14.1 Session rules
-
-- Supports **1–4 players** in online co-op. Single-player runs the same core simulation rules. Session owner hosts or uses an authoritative server; the **authority** validates items, money, combat results, quests, container opening, enemy state, movement constraints and world generation.
-- Host creates lobby with privacy (public/friends/invite/password), campaign/difficulty, max players, player list, ready state and start/continue action. Players can join with existing compatible characters, subject to campaign-depth gating.
-- Players have independent characters, attributes, level, equipment, spellbooks, consumables, gold and inventory. The session shares a current **world campaign instance** with explicit progress rules.
-- All active players see other player avatars, equipment, animations, attacks, projectiles, combat effects, nameplates, health indicators and location markers within appropriately revealed map areas.
-
-### 14.2 Cooperative campaign ownership
-
-- **Host campaign** determines dungeon seed, visited floor layouts, world containers, bosses defeated, gate/shortcut state and shared main-story quest flags. Joining players preserve individual character progression; hosts retain campaign progress when guests leave.
-- Guests receive personal quest/achievement credit for shared objectives they participate in or witness while in the same instance. Side quests have explicit ownership flags (`party_shared` or `personal`). One-time world rewards are not created anew for every joining player.
-- A player may independently return to town; floor transitions do not require unanimous party movement. If all players leave a boss encounter before the boss is defeated, the boss resets to its initial state on re-entry, without issuing loot. Boss defeated once remains defeated in host campaign.
-- Shared world chests can be opened only once in a campaign instance; their contents are **instanced per eligible player on initial opening**. A player's loot allocation is deterministic and remains claimable when they return/reconnect; a newly joined player does not retroactively generate unlimited loot from previously opened chests.
-- Ordinary enemy kills generate personal loot rolls for players who participated or were in vicinity at kill time, with same committed loot entitlement rules. Unique quest items are awarded by objective state, not duplicated world pickups.
-
-### 14.3 Party scaling and friendly interaction
-
-- Monster HP multiplier: `1 + 0.6*(party_size-1)`; base damage multiplier `1 + 0.12*(party_size-1)` (rounded consistently). Encounter budget multiplier: `1 + 0.35*(party_size-1)`, with spawn caps and arena restrictions. Boss mechanics may add additional targets/reinforcements but must remain readable.
-- Baseline **friendly fire off** for direct player spells, weapons and kicks; physical pushes against allies off by default. Party members may still be affected by **world hazards** if hazard is not player-owned. Optional friendly-fire setting explicitly changes this.
-- Enemy target selection can switch among visible players by threat, damage, proximity and taunt. Tank/blocking builds can intentionally draw attention; supports healing/buffing party members.
-- XP for enemies is awarded to nearby/participating eligible players according to the same source XP amount; do not reduce an individual share merely because more players are present. Quest XP awarded once per qualifying player.
-
-### 14.4 Death, revival, disconnect and reconnection
-
-- In multiplayer a player at zero HP enters **downed** state for 20 s unless finished by a special mechanic. An ally can revive by interacting for 3 s uninterrupted; revive returns 30% health, leaves consumables untouched and does not trigger duplicate death penalties.
-- When bleedout finishes (or solo HP reaches zero), perform normal death rules in Section 15. A dead player may spectate or respawn in town according to mode.
-- On disconnect, player avatar is safely removed after authoritative state capture; rejoining resumes character state at a legal location (town or valid party checkpoint), with committed items/quest flags and no repeated reward issuance.
-- Host departure ends an ordinary hosted session gracefully with each character saved. If host migration is provided, transfer a complete authoritative snapshot and continue without two concurrent authorities; no silent item duplication or lost floor state.
-- Combat hit registration, enemy HP and loot grants are server-authoritative. Client prediction/interpolation may improve feel but is corrected by the authority without permanently diverging inventory or quest states.
-
-### 14.5 Multiplayer UI
-
-Lobby status; invites/join code; other player health/name/level/class; optional compass direction/party waypoint; loot entitlement indicators; revive prompts; party chat/text quick phrases; mute/volume controls; connection quality and disconnect/error messages. Character deletion, campaign reset and host-only actions require appropriate confirmation/permission.
-
----
-
-## 15. Death, difficulty, saving and continuation
-
-### 15.1 Difficulty profiles
+### 14.1 Difficulty profiles
 
 | Setting | Enemy HP | Enemy damage | Loot quality | Death handling |
 |---|---:|---:|---|---|
 | Wanderer | 0.80× | 0.75× | 1.0× | Standard respawn; lower gold loss |
 | Adventurer (default) | 1.00× | 1.00× | 1.0× | Standard respawn |
 | Dread | 1.25× | 1.35× | 1.1× | Standard respawn; greater gold loss |
-| Ironbound (hardcore toggle) | Uses selected damage profile | Uses selected HP profile | Uses selected loot profile | Permadeath when solo death or all co-op revival options expire |
+| Ironbound (hardcore toggle) | Uses selected damage profile | Uses selected HP profile | Uses selected loot profile | Permadeath on death |
 
 Difficulty must not arbitrarily invalidate item-drop constraints or required quest rewards. It may change enemy stats, encounter budget, resource drops and death penalty, but does not change floor graph solvability. Difficulty changes during play are allowed only from town and are recorded; hardcore cannot be disabled after character creation.
 
-### 15.2 Death and corpse recovery
+### 14.2 Death and corpse recovery
 
 **Standard mode:** On death, display death screen and return player to town at full health and mana; equipment and backpack retained. Drop **10% of carried gold** into a recoverable personal corpse/cache at safe reachable location near death (Wanderer 5%, Dread 20%), preserving exactly one recoverable record. If a previous cache exists when dying again, its gold transfers to new cache or is explicitly forfeited with a warning—never silently duplicates. Character XP and level do not decrease by default. Defeated bosses stay defeated; regular enemies slain before death stay dead for that campaign instance. Temporary buffs end on death.
 
-**Hardcore:** Character is marked permanently dead; game prevents reentry as that character. Stash/campaign options follow explicit difficulty mode rules; no accidental deletion of other saved characters. In co-op, a downed character can be revived before the terminal death condition.
+**Hardcore:** Character is marked permanently dead; game prevents reentry as that character. Stash/campaign options follow explicit difficulty mode rules; no accidental deletion of other saved characters.
 
-### 15.3 Saving and loading
+### 14.3 Saving and loading
 
 - Character creation creates a persistent save slot. Autosave on entering town, changing floors, quest completion, boss kill, service transactions, level-up point allocation, major item pickup and graceful exit; optional manual save in safe non-combat contexts.
 - Save includes schema version, content version, character IDs/class/appearance, base stats and unspent points, XP, gear and every item **instance ID + rolls + durability + identification**, inventory cell coordinates, hotbar bindings, gold, stash, spell/talent ranks, quest flags, dialog history, difficulty, current region/floor/position, discovered fog, dungeon seed, all generated room placements, world interactive states, committed loot entitlements, floor actor states, unlocked waypoints and persistent portals.
 - **Atomic write:** create complete new snapshot, validate checksum/structure and commit; retain a previous good snapshot. Corrupted/mismatched saves show recoverable error and do not silently replace the file with a fresh character.
 - Loading validates references; unknown removed item IDs are migrated to safe placeholder items or compensation entries rather than deleting saves. Changing item definition does not reset a unique instance's already rolled affixes unless migration explicitly says so.
 - Save/load never refreshes already opened containers, resets merchant stock without milestone, grants an already claimed quest reward, restores consumed potions, resurrects permanently dead bosses, or multiplies an item by re-joining.
-- Single-player pause freezes combat simulation timers. Saving mid-buff stores remaining durations; real-world elapsed time does not secretly drain health or potion effects while game is closed. Multiplayer world time continues while one player views menus.
+- Pause freezes combat simulation timers. Saving mid-buff stores remaining durations; real-world elapsed time does not secretly drain health or potion effects while game is closed.
 
-### 15.4 Checkpoints and travel
+### 14.4 Checkpoints and travel
 
 - Activated waypoints/shortcuts persist and permit entry at selected discovered floors from town; do not reveal undiscovered rooms or bypass mandatory boss prerequisites.
-- A **Return Sigil** creates temporary paired portals between floor and town, only where collision/placement and combat restrictions allow. A portal is tagged with campaign, source floor, world position, owner/party access, and active state; travel respects host campaign state.
+- A **Return Sigil** creates temporary paired portals between floor and town, only where collision/placement and combat restrictions allow. A portal is tagged with campaign, source floor, world position, owner, and active state.
 - Town is the only permanent services hub. No mobile market, base-building system, open world, fast-travel network to unrelated towns, or separate randomized dungeon selection is part of this specification.
 
 ---
 
-## 16. Audio, art direction, lighting and atmosphere
+## 15. Audio, art direction, lighting and atmosphere
 
-### 16.1 Visual direction
+### 15.1 Visual direction
 
 Original stylized, textured dark fantasy: strongly readable weapons, creatures and architecture; varied torchlight and magical colors; deep shadows without making basic navigation impossible. Maintain four visually recognizable dungeon regions plus town. Lighting supports gloom and suspense, with controls for brightness, gamma and high-contrast markers.
 
@@ -800,13 +762,13 @@ Original stylized, textured dark fantasy: strongly readable weapons, creatures a
 - Deeper floors can introduce stronger ambient effects, geometry illusions, distant monster noises, vignette and color shifts **without** disrupting collision or causing unavoidable photic effects.
 - Equipment models communicate category and rarity. Enchanted weapons visibly emit a relevant aura/light. Unique items may change first-person idle and swing presentation in addition to gameplay.
 
-### 16.2 Sound and music
+### 15.2 Sound and music
 
 - Distinct footsteps by material; weapon whooshes/impacts by type and target material; block/parry/stagger sounds; creature cues by archetype; ambient town dialogue and work sounds; positional enemy threats; room-scale reverb; distant bells/doors/echoes; trap telegraphs; item pickup rarity chimes; UI interaction sounds.
 - Dynamic ambient score depends on location, encounter state, boss phase and proximity to danger; transitions crossfade and never restart aggressively on every room threshold.
-- Volume categories: master, music, ambience, effects, dialogue, voice chat. Subtitles for dialogue and significant voice barks. Output channel/device defaults, mute and mono compatibility.
+- Volume categories: master, music, ambience, effects, dialogue. Subtitles for dialogue and significant voice barks. Output channel/device defaults, mute and mono compatibility.
 
-### 16.3 Visual-effects behavior
+### 15.3 Visual-effects behavior
 
 - Weapon trails only during valid active strike frames; blood/impact particles reflect target material; block spark and damage type are perceptible; status effects and telegraphs readable without excessive opacity.
 - Corpses and severed limb props obey a debris budget with priority for active combat interactions. Reduced gore substitutes simpler impacts/neutral fragments, while gameplay effects remain intact.
@@ -814,13 +776,13 @@ Original stylized, textured dark fantasy: strongly readable weapons, creatures a
 
 ---
 
-## 17. Settings, accessibility and quality-of-life
+## 16. Settings, accessibility and quality-of-life
 
 **Video:** display mode, resolution, refresh rate, aspect ratio, V-sync, frame cap, render scale, graphics presets and individual shadows/lights/postprocess/particles; FOV; gamma/brightness; UI scale; subtitle scale; color-blind options.
 
 **Input:** mouse sensitivity/invert axis, key remapping for every action, hold/toggle sprint/crouch/aim, controller mapping, aim sensitivity and dead zone; interaction tooltips show bound keys rather than hard-coded letters.
 
-**Accessibility:** subtitles with speaker names, adjustable text size and contrast, reduce camera shake/headbob/motion blur/flashes, non-gore mode, input rebinding, toggle sprint, optional enemy outline and loot-label visibility, optional hold-interact instead of repeated taps, alternate icon encoding for rarity, pause in single-player.
+**Accessibility:** subtitles with speaker names, adjustable text size and contrast, reduce camera shake/headbob/motion blur/flashes, non-gore mode, input rebinding, toggle sprint, optional enemy outline and loot-label visibility, optional hold-interact instead of repeated taps, alternate icon encoding for rarity, pause.
 
 **Gameplay:** difficulty, item-label visibility, auto-pickup gold and/or potions, floating damage numbers on/off, enemy HP bars on/off, objective marker on/off, minimap rotate/fixed, potion key auto-select, combat log verbosity, item comparison toggles.
 
@@ -828,7 +790,7 @@ Original stylized, textured dark fantasy: strongly readable weapons, creatures a
 
 ---
 
-## 18. Content catalog requirements
+## 17. Content catalog requirements
 
 To give the rules concrete assets and discoverable gameplay, define the following **minimum authored content catalog**, with data-generated variants on top:
 
@@ -857,11 +819,11 @@ To give the rules concrete assets and discoverable gameplay, define the followin
 | Lore entries | At least 24 discoverable entries spread across town/floors |
 | Town vendor/utility windows | Buy/sell, identify, repair, recharge, heal, stash, respec |
 | Save modes | Normal + hardcore; four difficulty profile combinations as defined |
-| Play modes | Solo and online co-op for 2–4 players |
+| Play modes | Single-player only |
 
 All catalog entries must reference valid in-game content IDs/assets. Procedural repetition can produce additional item names, enemies, rooms and combinations, but a placeholder entry may not point to missing core behavior.
 
-### 18.1 Specific relic behavior examples
+### 17.1 Specific relic behavior examples
 
 These are authored gameplay templates, not just colored variants:
 
@@ -882,24 +844,24 @@ All are level-gated by item base, have correctly reflected tooltips and visuals,
 
 ---
 
-## 19. Data model and interfaces between systems
+## 18. Data model and interfaces between systems
 
-### 19.1 Core entity/component concepts
+### 18.1 Core entity/component concepts
 
 Treat content **definitions** as immutable catalog entries and runtime **instances** as uniquely identified mutable objects. Suggested domain objects (names are illustrative, behavior is mandatory):
 
 - `CharacterDefinition / CharacterState`: class, base attributes, level, XP, point allocations, gear refs, bag placements, known spells, talents, resources, quest record, world position.
 - `ItemDefinition / ItemInstance`: base metadata, footprint, slot, permitted class/requirements, damage/armor, affix pools, rarity, roll values, durability, charges, identified state, unique effect, quantity, owner and instance ID.
 - `SkillDefinition / SkillState`: resource cost, cooldown, windup, hit source, range, statuses, ranks, requirements, assigned slot, cooldown remaining.
-- `ActorDefinition / ActorState`: archetype, faction, stats, anatomy, AI state, position, aggro target, statuses, dead/drop flags, stable network ID.
+- `ActorDefinition / ActorState`: archetype, faction, stats, anatomy, AI state, position, aggro target, statuses, dead/drop flags, stable ID.
 - `RoomChunkDefinition / RoomInstance`: geometry asset ID, connectors, anchors, tags, world transform, room role, stable ID, room mutation flags.
 - `FloorGraph / FloorInstance`: seed, logical nodes/edges, room placement list, spawned actor IDs, object states, fog, committed rewards, shortcut state.
 - `QuestDefinition / QuestState`: prerequisites, objective graph, progress values, completion and reward-claimed flags.
 - `VendorDefinition / VendorState`: stock, restock milestone, transaction list/buyback and services.
-- `CampaignState`: campaign ID, world seed, difficulty, owner/party context, global story flags, floor states, waypoints, death caches, active portals.
+- `CampaignState`: campaign ID, world seed, difficulty, global story flags, floor states, waypoints, death caches, active portals.
 - `SaveEnvelope`: schema/content versions, timestamps, checksum, character/campaign refs and serialized state.
 
-### 19.2 Example item definition and rolled instance
+### 18.2 Example item definition and rolled instance
 
 ```json
 {
@@ -940,7 +902,7 @@ Treat content **definitions** as immutable catalog entries and runtime **instanc
 }
 ```
 
-### 19.3 Example enemy and attack definition
+### 18.3 Example enemy and attack definition
 
 ```yaml
 id: bone_militia
@@ -976,24 +938,24 @@ loot_table: region1_undead
 experience: 24
 ```
 
-### 19.4 World event contract
+### 18.4 World event contract
 
 Systems communicate with typed events carrying source and stable IDs; handlers must be idempotent for award/state events. Required events include:
 
-`CharacterCreated`, `FloorGenerated`, `FloorEntered`, `RoomDiscovered`, `InteractionSucceeded`, `DoorStateChanged`, `AttackCommitted`, `HitResolved`, `StatusApplied`, `LimbSevered`, `ActorKilled`, `LootRolled`, `ItemPickedUp`, `ItemEquipped`, `ItemConsumed`, `GoldChanged`, `QuestObjectiveAdvanced`, `QuestCompleted`, `RewardClaimed`, `CharacterLeveled`, `SkillLearned`, `BossDefeated`, `PortalCreated`, `CharacterDied`, `PlayerRevived`, `VendorTransactionCommitted`, `SaveCommitted`.
+`CharacterCreated`, `FloorGenerated`, `FloorEntered`, `RoomDiscovered`, `InteractionSucceeded`, `DoorStateChanged`, `AttackCommitted`, `HitResolved`, `StatusApplied`, `LimbSevered`, `ActorKilled`, `LootRolled`, `ItemPickedUp`, `ItemEquipped`, `ItemConsumed`, `GoldChanged`, `QuestObjectiveAdvanced`, `QuestCompleted`, `RewardClaimed`, `CharacterLeveled`, `SkillLearned`, `BossDefeated`, `PortalCreated`, `CharacterDied`, `VendorTransactionCommitted`, `SaveCommitted`.
 
 - State changes should occur in domain transactions with unique event IDs; observers for UI/audio/quests may respond without repeating underlying grants.
 - An enemy death should emit at most one credited kill and one committed loot allocation per eligible recipient; duplicate `ActorKilled` notifications do not duplicate drops.
 - World objects and quest flags reference stable IDs rather than fragile scene-instance ordering.
 
-### 19.5 Ownership and authority
+### 18.5 Ownership and authority
 
 - Definitions (item templates, spell definitions, loot tables, enemy archetypes, rooms) are versioned content data.
-- Runtime character/campaign state belongs to an authoritative sim even in single-player. UI sends commands and renders state; it cannot directly mint items, change gold or flag quests complete.
+- Runtime character/campaign state belongs to an authoritative simulation. UI sends commands and renders state; it cannot directly mint items, change gold or flag quests complete.
 - Generated floor remains fully reconstructible from stored placements plus mutable state; persistent rewards maintain separate stable IDs and claim records.
 - Floating damage text, HUD states, audio and cosmetic effects are projections of accepted state/events, not sources of truth.
 
-### 19.6 Required sample content configuration
+### 18.6 Required sample content configuration
 
 ```yaml
 game_rules:
@@ -1018,11 +980,6 @@ game_rules:
   loot:
     rarity_weight_percent: {common: 65, enchanted: 25, rare: 9, relic: 1}
     stack_max_default: 20
-  multiplayer:
-    max_players: 4
-    friendly_fire_default: false
-    revive_channel_s: 3
-    downed_timer_s: 20
   difficulty:
     default: adventurer
     normal_gold_loss_fraction: 0.10
@@ -1031,11 +988,11 @@ game_rules:
 Configuration controls balance and content references centrally. Behavior must read the corresponding resolved rule rather than hardcoding numbers in UI text or enemy scripts.
 
 ---
-## 20. System verification and acceptance criteria
+## 19. System verification and acceptance criteria
 
 All conditions below describe **observable required behavior**. They are expressed as user journeys and mechanical invariants rather than engine-specific implementation steps.
 
-### 20.1 Character creation and the full game loop
+### 19.1 Character creation and the full game loop
 
 - [ ] A new game starts with a selectable class, valid starting gear, configured attributes, health/mana/stamina, and an available save slot.
 - [ ] Player can walk around town, talk to services, purchase potions, enter Floor 1, fight, take damage, heal, gain XP/gold, loot a real item, equip it, interact with rooms and stairs, and return to town.
@@ -1044,7 +1001,7 @@ All conditions below describe **observable required behavior**. They are express
 - [ ] All three classes can progress through the same authored world; no boss or mandatory door requires a class-exclusive skill, unless a universal alternative exists.
 - [ ] Each dungeon floor has at least one viable route to its objective, with no impossible key/lock cycle or impassable geometry.
 
-### 20.2 Attributes and combat math
+### 19.2 Attributes and combat math
 
 - [ ] Spend STR: melee damage and applicable requirements update correctly. Spend DEX: speed/crit/ranged damage update; INT: mana/magic; VIT: HP/stamina.
 - [ ] A 1-point attribute change affects only the intended dependencies, and the character sheet explains the difference.
@@ -1058,7 +1015,7 @@ All conditions below describe **observable required behavior**. They are express
 - [ ] Spells honor range, line-of-sight, mana, cast time, cooldown, targets, ranks and resistance. A spell canceled before its commitment frame cannot damage or spend mana.
 - [ ] Each class talent can be unlocked, leveled, equipped, activated, put on cooldown and saved; passive modifiers persist after reload.
 
-### 20.3 Items, loot and economy
+### 19.3 Items, loot and economy
 
 - [ ] Every ground item has a unique instance ID and only one pickup destination; no pickup loses an item when backpack is full.
 - [ ] 1×3 sword fits a 10×6 backpack only when three appropriate contiguous cells are available; grid collision/rotation/stack split/merge and sorting obey exact occupancy.
@@ -1073,7 +1030,7 @@ All conditions below describe **observable required behavior**. They are express
 - [ ] Quest items cannot be accidentally sold, dropped irretrievably or deleted by auto-sort.
 - [ ] Gold received, spent, dropped on death and recovered from corpse adds up; vendor stock cannot be rerolled through opening/closing a menu.
 
-### 20.4 Procedural geometry and exploration
+### 19.4 Procedural geometry and exploration
 
 - [ ] For a reproducible sample set of at least **1,000 different seeds per region** (and all 16 floor indices), graph construction always yields start, required quest/key rooms, boss if required and valid exit, with no unconnected mandatory room.
 - [ ] No chunk intersection invalidates navigation, blocks a doorway, seals an exit, traps the player or exposes a drop with no recovery rule where progress is required.
@@ -1084,7 +1041,7 @@ All conditions below describe **observable required behavior**. They are express
 - [ ] Same world seed and version produces identical **initial** layouts/loot; stepping, particle animation or AI decisions do not reroll committed outcomes.
 - [ ] Returning to town or another floor and re-entering restores the same rooms, gates, chests, quest objects and boss flags.
 
-### 20.5 Campaign, quests, saving and co-op
+### 19.5 Campaign, quests and saving
 
 - [ ] Save and reload at each major lifecycle event preserves character and world, including the item instance and its cell coordinates; no rollback or duplication of committed rewards.
 - [ ] Repeated `ActorKilled`, `QuestCompleted`, `BossDefeated` and `VendorTransactionCommitted` messages do not grant repeated XP/gold/loot or break state.
@@ -1092,12 +1049,9 @@ All conditions below describe **observable required behavior**. They are express
 - [ ] Boss defeat sets correct quest flag, opens relevant exit/shortcut, generates exactly one designated reward and remains defeated across reload/re-entry.
 - [ ] All standard death modes restore appropriate state, retain equipment, create at most one valid recoverable gold cache, and cannot create negative gold or permanent trapped respawn.
 - [ ] Hardcore dead character cannot re-enter world as alive, and unrelated character slots remain intact.
-- [ ] A second player joins co-op, sees player/monster/loot states, damages shared enemies, earns personal XP and eligible loot, leaves and reconnects without resetting chest/boss rewards.
-- [ ] Two players try to pick up or move the same **shared** item; authoritative ownership prevents duplication. Personalized loot entitlements remain distinct.
-- [ ] Co-op downed/revive/bleedout are consistent for both participants; finished boss, floor gating and town portals persist under reconnect.
 - [ ] A corrupted save is detected; game offers recovery from prior valid snapshot rather than silently creating an empty campaign.
 
-### 20.6 UI, input, audio and accessibility
+### 19.6 UI, input, audio and accessibility
 
 - [ ] Every button and binding is functional, rebindable and labeled consistently in menus, HUD and prompts; first-person attack and guard correspond to displayed equipment.
 - [ ] Items show requirement warning, rarity, comparisons, exact costs and identified/unknown state accurately.
@@ -1108,7 +1062,7 @@ All conditions below describe **observable required behavior**. They are express
 
 ---
 
-## 21. Cross-system edge cases and resolution rules
+## 20. Cross-system edge cases and resolution rules
 
 | Situation | Required behavior |
 |---|---|
@@ -1123,23 +1077,20 @@ All conditions below describe **observable required behavior**. They are express
 | Player saves while standing in a closing door, moving lift or trap volume | Restore to validated nearest safe navigation point with consistent object state |
 | Return portal created on unstable geometry | Placement fails with a message and no mana/scroll consumed before valid placement commitment |
 | Player travels from deep floor to town and quits | Source floor, map, chest state and return location remain preserved |
-| Client and host disagree about whether a potion was consumed | Authority accepts/rejects one consumption event; client reconciles visual stack/cooldown |
-| Player disconnects during vendor transaction | Commit entirely or roll back entirely; never pay without item or get item without charge |
-| Co-op guest kills campaign boss while host is in town | Host campaign registers completion and coherent quest state; host-only dialogue prompts update |
-| All players die mid boss fight | Encounter resets once, with no loot until boss defeated; progression gates remain intact |
+| Game closes or crashes during a vendor transaction | Commit entirely or roll back entirely; never pay without item or get item without charge |
+| Player dies mid boss fight | Encounter resets once, with no loot until boss defeated; progression gates remain intact |
 | Quest objective spawns in a secret-only inaccessible branch | Generator rejects/rearranges or adds mandatory discoverable path, preserving completion |
 | Two quests request same unique item | Each objective has its own stable completion flag and explicit ownership/consumption policy |
 | Different item definitions after software update | Save migration retains owned unique instance IDs and compensates safely for missing catalog IDs |
-| Co-op player at disconnected position after floor graph version change | Place at valid room anchor and preserve owned items/claimed rewards |
 | Unidentified item grants a stat that enables another item | Effective stats may qualify it, but unidentified tooltip cannot leak hidden affix name; derived total is accurate |
 | Inventory auto-sort moves hotbar-bound item | Bind by stable item type/instance ID rather than cell coordinate; hotbar continues functioning |
 | Physics kicks propel quest object out of the world | Object is clamped/respawned to persistent recovery anchor or nonphysical when quest-critical |
 | Player respecs class tree while a passive modifies resource max | Recalculate derived stats and clamp current resources; cancel abilities no longer learned |
-| Status duration expires while game paused in solo | World simulation time frozen; no duration consumed until gameplay resumes |
+| Status duration expires while game is paused | World simulation time frozen; no duration consumed until gameplay resumes |
 
 ---
 
-## 22. Typical end-to-end player journeys
+## 21. Typical end-to-end player journeys
 
 These are precise reference scenarios that together exercise the main game rules.
 
@@ -1173,16 +1124,7 @@ These are precise reference scenarios that together exercise the main game rules
 5. Player defeats boss and receives unique world-state unlock and guaranteed rare drop. The next staircase becomes usable; quest updated.
 6. Player returns home, saves and reloads. Boss does not return; opened chests remain opened; other floors retain generated layouts.
 
-### Journey D — Cooperative expedition
-
-1. Host starts campaign lobby, selects difficulty and invites two players.
-2. Players enter same generated dungeon; each sees companions' equipment, action effects and bars; monsters scale to party size.
-3. A chest opens once; individual eligible loot instances are assigned, and only correct owner can claim them.
-4. One player is downed. Another channels revive; revive interruption and success follow exact timers.
-5. Host returns to town to restock while guests remain on floor. Quest/boss credit is synchronized according to shared flags and participation.
-6. Guest disconnects, rejoins and receives character items/XP unchanged and current valid campaign geometry; already claimed rewards remain claimed.
-
-### Journey E — Death and recovery
+### Journey D — Death and recovery
 
 1. Player dies in the Ossuary after gathering gold and a rare sword.
 2. Death transaction records loss of 10% of carried gold in a recoverable cache and respawns player in town; rare sword remains in inventory.
@@ -1191,7 +1133,7 @@ These are precise reference scenarios that together exercise the main game rules
 
 ---
 
-## 23. Completeness checklist by subsystem
+## 22. Completeness checklist by subsystem
 
 This table is a **feature registry**: each row refers to the normative specification above. All rows are in scope.
 
@@ -1216,13 +1158,12 @@ This table is a **feature registry**: each row refers to the normative specifica
 | Narrative | Main quest, NPC service dialogue, side quests, procedural events, lore, journal, objective tracking, endings |
 | Presentation | HUD, orbs, bars, inventory/character/skills/shop screens, tooltips, damage/loot feedback, dark fantasy audio/lighting |
 | Persistence | Atomic saves, item IDs, dungeon layout snapshots, quest flags, fog, transaction protection, death/recovery, New Descent |
-| Co-op | Lobby/invites, authoritative gameplay, 2–4 players, loot allocation, scaling, independent town trips, revive, reconnect |
 | Settings | Audio/video/input, FOV, UI scale, remapping, color-blind/motion reduction, non-gore, subtitle support, play options |
-| Validation | Deterministic seed tests, gameplay/math tests, save/load transactions, multiplayer race conditions and no-softlock guarantees |
+| Validation | Deterministic seed tests, gameplay/math tests, save/load transactions and no-softlock guarantees |
 
 ---
 
-## 24. Reference mapping and documentation notes
+## 23. Reference mapping and documentation notes
 
 **Research and design inputs:**
 
@@ -1234,7 +1175,7 @@ This table is a **feature registry**: each row refers to the normative specifica
 
 **Directly visible in provided screenshots:** First-person sword and shield, lower HUD with two resource orbs and stamina/progress bar, six number slots and class ability prompt, small fog-map in upper-left, loot/XP feedback, a dark dungeon labeled by level, outdoor town with NPCs and multi-building architecture, character equipment preview, a grid backpack, numerical character attributes (Strength, Dexterity, Intellect, Vitality), combat/defense stat panels, level XP bar and gold counter.
 
-**Specification decisions/inferences:** Specific formulas, all numbers, new class names and talent names, world fiction, floor count, regional lineup, death rules, co-op loot rights, room counts, enchantment distribution, item catalog, quest structure, and data schemas are **proposed rules for this independent implementation**, not factual claims about the unseen internals of the referenced game. Where public references differ (for example class naming in trailer versus a store description), this document deliberately defines a consistent original class roster.
+**Specification decisions/inferences:** Specific formulas, all numbers, new class names and talent names, world fiction, floor count, regional lineup, death rules, room counts, enchantment distribution, item catalog, quest structure, and data schemas are **proposed rules for this independent implementation**, not factual claims about the unseen internals of the referenced game. Where public references differ (for example class naming in trailer versus a store description), this document deliberately defines a consistent original class roster.
 
 **Copyright boundary:** No branded story text, original game assets, trademarked presentation, specific dialogue or source code is required or authorized by this design. The common genre mechanics are expressed using original content labels and independently specified rules.
 
